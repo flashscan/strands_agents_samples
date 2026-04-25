@@ -4,6 +4,7 @@ import logging
 from ddgs import DDGS
 from ddgs.exceptions import DDGSException, RatelimitException
 from strands import Agent, tool
+from strands.models.bedrock import BedrockModel
 
 # Configure logging
 logging.getLogger("strands").setLevel(
@@ -14,7 +15,7 @@ logging.getLogger("strands").setLevel(
 # Define a websearch tool
 @tool
 def websearch(
-    keywords: str, region: str = "us-en", max_results: int | None = None
+    keywords: str, region: str = "eu-central-1", max_results: int | None = None
 ) -> str:
     """Search the web to get updated information.
     Args:
@@ -34,9 +35,15 @@ def websearch(
     except Exception as e:
         return f"Exception: {e}"
 
+model = BedrockModel(
+    model_id="us.amazon.nova-2-lite-v1:0",
+    region_name="us-east-1",
+    max_tokens=8192,
+)
 
 # Create a recipe assistant agent
 recipe_agent = Agent(
+    model=model,
     system_prompt="""You are RecipeBot, a helpful cooking assistant.
     Help users find recipes based on ingredients and answer cooking questions.
     Use the websearch tool to find recipes when users mention ingredients or to look up cooking information.""",
